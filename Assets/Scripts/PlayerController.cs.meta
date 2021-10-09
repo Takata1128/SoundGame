@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 8c23a50bb612d1d4db891b7d71d1c771
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - prefabSingleNote: {fileID: 2416607452217456768, guid: 3bbe65c02cfba2b4488bc4990c4374b7, type: 3}
+  - prefabLongNote: {fileID: 7810457616078091663, guid: 1a66561bbc66b9c449fd72199a42ab6b, type: 3}
+  - prefabBgmObject: {fileID: 7643927044175796701, guid: cf33f5d55740dfb45b7aeabc4836165a, type: 3}
+  - audioSource: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

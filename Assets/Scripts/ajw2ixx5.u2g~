@@ -1,0 +1,122 @@
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+public class JudgementManager : MonoBehaviour
+{
+    public static Dictionary<JudgementType, float> JudgementWidth = new Dictionary<JudgementType, float> {
+        { JudgementType.Perfect, 0.05f }, // perfectの判定幅
+        { JudgementType.Great, 0.10f }, // greatの判定幅
+        { JudgementType.Good, 0.20f }, // goodの判定幅
+        { JudgementType.Bad, 0.30f }, // badの判定幅
+    };
+
+    private static KeyCode[] InputKeys = new KeyCode[]
+        {
+            KeyCode.D,
+            KeyCode.F,
+            KeyCode.G,
+            KeyCode.H,
+            KeyCode.J,
+            KeyCode.K,
+            KeyCode.L,
+        };
+
+    // Update is called once per frame
+    void Update() {
+        // 各レーンに対して処理
+        for (int lane = 0; lane < InputKeys.Length; lane++) {
+            // レーンに対応するキー
+            var inputKey = InputKeys[lane];
+
+            // キーを押下した時
+            if (Input.GetKeyDown(inputKey)) {
+                // 最近傍ノーツ
+                var nearest = GetNearestNoteControllerBaseInLane(lane);
+                if (!nearest) continue;
+
+                // 処理すべきタイミング
+                var noteSec = nearest.noteProperty.secBegin;
+                // 実際に押したタイミングとの差分
+                var differenceSec = Mathf.Abs(noteSec - PlayerController.CurrentSec);
+
+                // 判定処理
+                nearest.OnKeyDown(GetJudgementType(differenceSec));
+            }
+            // キーを離した時
+            else if (Input.GetKeyUp(inputKey)) {
+                // 処理中のノーツ
+                var processed = GetProcessedNoteControllerBaseInLane(lane);
+                if (!processed) continue;
+
+                // 処理すべきタイミング
+                var noteSec = processed.noteProperty.secEnd;
+                // 実際に離したタイミングとの差分
+                var differenceSec = Mathf.Abs(noteSec - PlayerController.CurrentSec);
+
+                // 判定処理
+                processed.OnKeyUp(GetJudgementType(differenceSec));
+            }
+        }
+    }
+
+    private JudgementType GetJudgementType(float differenceSec) {
+        // Perfect
+        if (differenceSec <= JudgementWidth[JudgementType.Perfect]) {
+            return JudgementType.Perfect;
+        }
+        // Great
+        else if (differenceSec <= JudgementWidth[JudgementType.Great]) {
+            return JudgementType.Great;
+        }
+        // Good
+        else if (differenceSec <= JudgementWidth[JudgementType.Good]) {
+            return JudgementType.Good;
+        }
+        // Bad
+        else if (differenceSec <= JudgementWidth[JudgementType.Bad]) {
+            return JudgementType.Bad;
+        }
+        // Other
+        else {
+            return JudgementType.Poor;
+        }
+
+
+    }
+
+    private NoteControllerBase GetNearestNoteControllerBaseInLane(int lane) {
+        // 指定したレーン内のノーツ
+        var noteControllers = PlayerController.ExistingNoteControllers.Where(x => x.noteProperty.lane == lane);
+
+        // ノーツが存在
+        if (noteControllers.Any()) {
+            // beatの差の絶対値が最も小さいものを返す
+            return noteControllers.OrderBy(x => Mathf.Abs(x.noteProperty.beatBegin - PlayerController.CurrentBeat)).First();
+        }
+        return null;
+    }
+
+    private NoteControllerBase GetProcessedNoteControllerBaseInLane(int lane) {
+        // 指定したレーン内のノーツ
+        var noteControllers = PlayerController.ExistingNoteControllers.Where(x => x.noteProperty.lane == lane && x.isProcessed);
+
+        // ノーツが存在
+        if (noteControllers.Any()) {
+            // beatの差の絶対値が最も小さいものを返す
+            return noteControllers.OrderBy(x => Mathf.Abs(x.noteProperty.beatBegin - PlayerController.CurrentBeat)).First();
+        }
+        return null;
+    }
+}
+}
+
+public enum JudgementType
+{
+    Perfect,
+    Great,
+    Good,
+    Bad,
+    Poor
+}

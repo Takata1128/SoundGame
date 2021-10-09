@@ -1,0 +1,142 @@
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using UnityEngine;
+using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
+public class PlayerController : MonoBehaviour
+{
+    [SerializeField] private GameObject prefabSingleNote; // 生成するprefab
+    [SerializeField] private GameObject prefabLongNote;
+    [SerializeField] private GameObject prefabBgmObject;
+
+    public static float ScrollSpeed = 1.0f;
+    public static float CurrentSec = 0f;
+    public static float CurrentBeat = 0f;
+
+    // 判定処理で消えていないノーツ一覧
+    public static List<NoteControllerBase> ExistingNoteControllers;
+
+    // Bgm処理で消えていないオブジェクト一覧
+    public static List<BgmController> ExistingBgmControllers;
+
+    public static Beatmap beatmap; // 譜面データ管理
+    private float startOffset = 1.0f; // 譜面のオフセット（秒）
+    private float startSec = 0f; // 譜面再生開始秒数 
+    private bool isPlaying = false; // 譜面停止中か否か
+
+
+    // Start is called before the first frame update
+    void Awake() {
+        CurrentSec = 0f;
+        CurrentBeat = 0f;
+
+        // 未処理ノーツ一覧を初期化
+        ExistingNoteControllers = new List<NoteControllerBase>();
+
+        // デバッグ用にテンポ変化をコンソールに出力
+        //foreach (var tempoChange in beatmap.tempoChanges) {
+        //    Debug.Log(tempoChange.beat + ": " + tempoChange.tempo);
+        //}
+
+        // Bgmオブジェクトの生成
+        foreach (var bgmProperty in beatmap.bgmProperties) {
+            GameObject objBgm = Instantiate(prefabBgmObject);
+            ExistingBgmControllers.Add(objBgm.GetComponent<BgmController>());
+            objBgm.GetComponent<BgmController>().bgmProperty = bgmProperty;
+
+        }
+
+        // ノーツの生成
+        foreach (var noteProperty in beatmap.noteProperties) {
+            GameObject objNote = null;
+            switch (noteProperty.noteType) {
+                case NoteType.Single:
+                    objNote = Instantiate(prefabSingleNote);
+                    break;
+                case NoteType.Long:
+                    objNote = Instantiate(prefabLongNote);
+                    break;
+            }
+            // 未処理ノーツ一覧に追加
+            ExistingNoteControllers.Add(objNote.GetComponent<NoteControllerBase>());
+            objNote.GetComponent<NoteControllerBase>().noteProperty = noteProperty;
+
+        }
+
+
+    }
+
+    // Update is called once per frame
+    void Update() {
+        // 譜面停止中にスペースを押したとき
+        if (!isPlaying && Input.GetKeyDown(KeyCode.Space)) {
+            // 譜面再生
+            isPlaying = true;
+            for(var bgmController in ExistingBgmControllers) {
+                bgmController.audioSource.PlayScheduled(
+                    AudioSettings.dspTime + startOffset + beatmap.audioOffset
+                );
+
+            }
+
+            // 指定した秒数待って音源再生
+
+        }
+        // 譜面停止中
+        if (!isPlaying) {
+            // startSec更新
+            startSec = Time.time;
+        }
+        // ゲーム終了
+        if (Input.GetKeyDown(KeyCode.Escape)) {
+            SceneManager.LoadScene("SelectScene");
+        }
+
+        // 秒数を更新
+        CurrentSec = Time.time - startOffset - startSec;
+
+        // 拍を更新
+        CurrentBeat = Beatmap.ToBeat(CurrentSec, beatmap.tempoChanges);
+    }
+
+    // 指定されたパスの音源を読み込む
+    private IEnumerator LoadAudioFile(string filePath) {
+        // ファイルが存在しない
+        if (!File.Exists(filePath)) { yield break; }
+        // 音源のフォーマット種別
+        var audioType = GetAudioType(filePath);
+
+        // UnityWebRequestで外部リソース読み込み
+        using (var request = UnityWebRequestMultimedia.GetAudioClip(
+            "file:///" + filePath, audioType
+            )) {
+            yield return request.SendWebRequest();
+            // エラーが発生
+            if (request.result == UnityWebRequest.Result.ConnectionError) {
+                Debug.LogError(request.error);
+                yield break;
+            }
+            // オーディオクリップ読み込み
+            var audioClip = DownloadHandlerAudioClip.GetContent(request);
+            // audioSourceのclipに設定
+            audioSource.clip = audioClip;
+        }
+    }
+
+    private AudioType GetAudioType(string filePath) {
+        // 拡張子
+        string ext = Path.GetExtension(filePath).ToLower();
+        switch (ext) {
+            case ".ogg":
+                return AudioType.OGGVORBIS;
+            case ".mp3":
+                return AudioType.MPEG;
+            case ".wav":
+                return AudioType.WAV;
+            default:
+                return AudioType.UNKNOWN;
+        }
+
+    }
+}
