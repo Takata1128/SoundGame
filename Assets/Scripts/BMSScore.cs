@@ -21,14 +21,15 @@ public class BMSScore
     {
         for (int i = 0; i < Lanes.Length; i++)
         {
-            for (int j = 0; j < Lanes[i].NoteList.Count; j++)
+            foreach (Note note in Lanes[i].NoteList)
             {
-                Lanes[i].NoteList[j].SecBegin = Util.ToSec(Lanes[i].NoteList[j].BeatBegin, Bpms);
+                note.SetSec(Bpms);
             }
         }
-        for (int i = 0; i < BGSounds.Count; i++)
+
+        foreach (BGNote bgNote in BGSounds)
         {
-            BGSounds[i].SecBegin = Util.ToSec(BGSounds[i].BeatBegin, Bpms);
+            bgNote.SetSec(Bpms);
         }
     }
 

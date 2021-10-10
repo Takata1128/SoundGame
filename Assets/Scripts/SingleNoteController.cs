@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class SingleNoteController : NoteControllerBase
 {
+
+    private void Start()
+    {
+    }
+
     private void FixedUpdate()
     {
         SetTransform();

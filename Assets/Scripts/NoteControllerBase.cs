@@ -8,6 +8,8 @@ public class NoteControllerBase : MonoBehaviour
     public Note note;
     public bool isProcessed = false; // �����O�m�[�c�������t���O
 
+    protected bool renderFlag = false;
+
     // Update is called once per frame
     [SerializeField] protected GameObject prefabBurst;
     [SerializeField] protected float deleteTime;

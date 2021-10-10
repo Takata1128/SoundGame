@@ -2,10 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
+
 
 public class JudgementManager : MonoBehaviour
 {
-    public PlayerController playerController;
+    [SerializeField] private PlayerController playerController;
+
+    [SerializeField] private JudgementUIManager judgementUIManager;
 
     public static Dictionary<JudgementType, float> JudgementWidth = new Dictionary<JudgementType, float> {
         { JudgementType.Perfect, 0.05f }, // perfect�̔��蕝
@@ -26,6 +30,10 @@ public class JudgementManager : MonoBehaviour
             KeyCode.Space,
             KeyCode.RightShift
         };
+
+    private void Start()
+    {
+    }
 
     // Update is called once per frame
     void Update()
@@ -56,6 +64,7 @@ public class JudgementManager : MonoBehaviour
             {
                 Destroy(noteController.gameObject);
                 PlayerController.ExistingNoteControllers[lane].Pop();
+                judgementUIManager.ShowJudge(JudgementType.Poor);
             }
 
         }
@@ -91,6 +100,7 @@ public class JudgementManager : MonoBehaviour
                     Destroy(nearest.gameObject);
                     PlayerController.ExistingNoteControllers[lane].Pop();
                 }
+                judgementUIManager.ShowJudge(judge);
             }
             // �L�[�𗣂�����
             else if (Input.GetKeyUp(inputKey))
@@ -114,6 +124,8 @@ public class JudgementManager : MonoBehaviour
                     Destroy(processed.gameObject);
                     PlayerController.ExistingNoteControllers[lane].Pop();
                 }
+                judgementUIManager.ShowJudge(judge);
+
             }
         }
     }

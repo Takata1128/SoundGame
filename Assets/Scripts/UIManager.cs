@@ -7,18 +7,20 @@ public class UIManager : MonoBehaviour
     private string valueFormat;
 
     // Start is called before the first frame update
-    void Start() {
+    void Start()
+    {
         valueFormat = textValue.text;
     }
 
     // Update is called once per frame
-    void Update() {
+    void Update()
+    {
         textValue.text = string.Format(valueFormat,
-            // ƒXƒRƒA
+            // ï¿½Xï¿½Rï¿½A
             EvaluationManager.score,
-            // ƒRƒ“ƒ{”
+            // ï¿½Rï¿½ï¿½ï¿½{ï¿½ï¿½
             EvaluationManager.combo,
-            // Å‘åƒRƒ“ƒ{”
+            // ï¿½Å‘ï¿½Rï¿½ï¿½ï¿½{ï¿½ï¿½
             EvaluationManager.maxCombo,
             // PERFECT
             EvaluationManager.judgementCounts[JudgementType.Perfect],

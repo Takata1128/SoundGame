@@ -36,6 +36,12 @@ public class Note : BMSObject
     public float BeatEnd;
     public float SecEnd;
 
+    public void SetSec(List<BPM> bpms)
+    {
+        SecBegin = Util.ToSec(BeatBegin, bpms);
+        SecEnd = Util.ToSec(BeatEnd, bpms);
+    }
+
     public Note(int keySound, float beatBegin) : base(beatBegin)
     {
         KeySound = keySound;

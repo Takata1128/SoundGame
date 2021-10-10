@@ -13,6 +13,9 @@ public class LongNoteController : NoteControllerBase
     [SerializeField] Color32 processedColorEdges; // �������̎n�_�I�_�̐F
     [SerializeField] Color32 processedColorTrail; // �������̋O�Ղ̐F
 
+    private void Start()
+    {
+    }
 
     // Update is called once per frame
 
