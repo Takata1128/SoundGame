@@ -8,7 +8,7 @@ class Util
     {
         if (str.Length != 2) return -1;
         int result = 0;
-        if (str[1] > 'A')
+        if (str[1] >= 'A')
         {
             result += str[1] - 'A' + 10;
         }
@@ -16,7 +16,7 @@ class Util
         {
             result += str[1] - '0';
         }
-        if (str[0] > 'A')
+        if (str[0] >= 'A')
         {
             result += (str[0] - 'A' + 10) * 36;
         }
@@ -27,14 +27,14 @@ class Util
         return result;
     }
 
-    public static float ToSecWithFixedTempo(float beat, float tempo)
+    public static float ToSecWithFixedTempo(float beat, float bpm)
     {
-        return beat / (tempo / 60f);
+        return beat / (bpm / 60f);
     }
 
-    public static float ToBeatWithFixedTempo(float sec, float tempo)
+    public static float ToBeatWithFixedTempo(float sec, float bpm)
     {
-        return sec * (tempo / 60f);
+        return sec * (bpm / 60f);
     }
 
     public static float ToSec(float beat, List<BPM> bpms)
@@ -52,7 +52,7 @@ class Util
             i++;
         }
         accumulatedSec += ToSecWithFixedTempo(
-            beat - bpms[i].BeatBegin, bpms[i].BeatBegin);
+            beat - bpms[i].BeatBegin, bpms[i].Bpm);
         return accumulatedSec;
     }
 

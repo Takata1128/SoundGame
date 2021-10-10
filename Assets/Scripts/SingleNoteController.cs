@@ -4,55 +4,49 @@ using UnityEngine;
 
 public class SingleNoteController : NoteControllerBase
 {
-    [SerializeField] AudioClip clipHit; // Œø‰Ê‰¹
-
-    // Update is called once per frame
-    void Update() {
+    private void FixedUpdate()
+    {
         SetTransform();
-        CheckMiss();
     }
 
 
-    // À•Wİ’è
-    private void SetTransform() {
+    // ï¿½ï¿½ï¿½Wï¿½İ’ï¿½
+    private void SetTransform()
+    {
         Vector3 position = new Vector3();
-        position.x = (float)noteProperty.lane - 3.5f;
-        position.z = (noteProperty.beatBegin - PlayerController.CurrentBeat) * PlayerController.ScrollSpeed;
+        position.x = (float)lane - 4.5f;
+        position.z = (note.BeatBegin - PlayerController.CurrentBeat) * PlayerController.ScrollSpeed;
         position.y = 0.0f;
-
         transform.localPosition = position;
     }
 
-    // Œ©“¦‚µŒŸo
-    private void CheckMiss() {
-        // Bad‚Ì”»’è•‚ğ’Ê‰ß
-        if (noteProperty.secBegin - PlayerController.CurrentSec < -JudgementManager.JudgementWidth[JudgementType.Bad]) {
-            // ƒ~ƒXˆ—
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½o
+    public override bool CheckMiss()
+    {
+        // Badï¿½Ì”ï¿½ï¿½è•ï¿½ï¿½Ê‰ï¿½
+        if (note.SecBegin - PlayerController.CurrentSec < -JudgementManager.JudgementWidth[JudgementType.Bad])
+        {
+            // ï¿½~ï¿½Xï¿½ï¿½ï¿½ï¿½
             EvaluationManager.OnMiss();
-
-            // –¢ˆ—ƒm[ƒcˆê——‚©‚çíœ
-            PlayerController.ExistingNoteControllers.Remove(
-                GetComponent<NoteControllerBase>()
-                );
-            // GameObject©‘Ì‚àíœ
-            Destroy(gameObject);
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½mï¿½[ï¿½cï¿½ê——ï¿½ï¿½ï¿½ï¿½íœ
+            return true;
         }
+        return false;
     }
 
-    public override void OnKeyDown(JudgementType judgementType) {
-        // ƒfƒoƒbƒO—p‚ÉƒRƒ“ƒ\[ƒ‹‚É”»’è‚ğo—Í
+    public override void OnKeyDown(JudgementType judgementType)
+    {
+        // ï¿½fï¿½oï¿½bï¿½Oï¿½pï¿½ÉƒRï¿½ï¿½ï¿½\ï¿½[ï¿½ï¿½ï¿½É”ï¿½ï¿½ï¿½ï¿½ï¿½oï¿½ï¿½
         Debug.Log(judgementType);
-
-        if (judgementType != JudgementType.Poor) {
-            // ƒqƒbƒgˆ—
+        if (judgementType != JudgementType.Poor)
+        {
+            // ï¿½qï¿½bï¿½gï¿½ï¿½ï¿½ï¿½
             EvaluationManager.OnHit(judgementType);
-
-            // Œø‰Ê‰¹Ä¶
-            AudioSource.PlayClipAtPoint(clipHit, transform.position);
-            // –¢ˆ—ƒm[ƒcˆê——‚©‚çíœ
-            PlayerController.ExistingNoteControllers.Remove(
-                GetComponent<NoteControllerBase>());
-            Destroy(gameObject);
+            // ï¿½ï¿½ï¿½Ê‰ï¿½ï¿½Äï¿½
+            Vector3 pos = gameObject.transform.position;
+            var burstEffect = Instantiate(prefabBurst, pos, Quaternion.identity);
+            burstEffect.transform.localScale *= burstSize;
+            Destroy(burstEffect, deleteTime);
         }
 
     }

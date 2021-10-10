@@ -15,15 +15,25 @@ public class PlayerController : MonoBehaviour
     public static float CurrentBeat = 0f;
 
     // ���菈���ŏ����Ă��Ȃ��m�[�c�ꗗ
-    public static List<NoteControllerBase> ExistingNoteControllers;
+    public static MyList<NoteControllerBase>[] ExistingNoteControllers;
 
-    // Bgm�����ŏ����Ă��Ȃ��I�u�W�F�N�g�ꗗ
-    public static List<BgmController> ExistingBgmControllers;
+    public static MyList<BgmController> ExistingBGSoundControllers;
 
-    public static Beatmap beatmap; // ���ʃf�[�^�Ǘ�
+    public static BMSHeader BmsHeader;
+    public static BMSScore BmsScore;
+    [SerializeField] public SoundManager SoundManager;
+
     private float startOffset = 1.0f; // ���ʂ̃I�t�Z�b�g�i�b�j
     private float startSec = 0f; // ���ʍĐ��J�n�b�� 
     private bool isPlaying = false; // ���ʒ�~�����ۂ�
+
+    private IEnumerator PreLoad()
+    {
+        SoundManager.Pathes = BmsHeader.SoundPathes;
+        SoundManager.AddAudioClips();
+        yield return new WaitUntil(() => SoundManager.IsPrepared);
+        Debug.Log("Game starts!");
+    }
 
 
     // Start is called before the first frame update
@@ -33,44 +43,24 @@ public class PlayerController : MonoBehaviour
         CurrentBeat = 0f;
 
         // �������m�[�c�ꗗ��������
-        ExistingNoteControllers = new List<NoteControllerBase>();
-        ExistingBgmControllers = new List<BgmController>();
+        ExistingNoteControllers = new MyList<NoteControllerBase>[10];
+        ExistingBGSoundControllers = new MyList<BgmController>();
+        for (int i = 0; i < 10; i++)
+        {
+            ExistingNoteControllers[i] = new MyList<NoteControllerBase>();
+        }
 
-        // �f�o�b�O�p�Ƀe���|�ω����R���\�[���ɏo��
-        //foreach (var tempoChange in beatmap.tempoChanges) {
-        //    Debug.Log(tempoChange.beat + ": " + tempoChange.tempo);
-        //}
+        foreach (var bpm in BmsScore.Bpms)
+        {
+            Debug.Log(bpm.BeatBegin + ": " + bpm.Bpm);
+        }
 
         // Bgm�I�u�W�F�N�g�̐���
-        foreach (var bgmProperty in beatmap.bgmProperties)
-        {
-            GameObject objBgm = Instantiate(prefabBgmObject);
-            BgmController controller = objBgm.GetComponent<BgmController>();
-            ExistingBgmControllers.Add(controller);
-            controller.bgmProperty = bgmProperty;
-            controller.LoadAudio(beatmap.audioFilePaths[bgmProperty.bgmIndex]);
-        }
-
-        // �m�[�c�̐���
-        foreach (var noteProperty in beatmap.noteProperties)
-        {
-            GameObject objNote = null;
-            switch (noteProperty.noteType)
-            {
-                case NoteType.Single:
-                    objNote = Instantiate(prefabSingleNote);
-                    break;
-                case NoteType.Long:
-                    objNote = Instantiate(prefabLongNote);
-                    break;
-            }
-            // �������m�[�c�ꗗ�ɒǉ�
-            ExistingNoteControllers.Add(objNote.GetComponent<NoteControllerBase>());
-            objNote.GetComponent<NoteControllerBase>().noteProperty = noteProperty;
-        }
-
-
+        MakeObject(BmsScore);
+        StartCoroutine(PreLoad());
     }
+
+
 
     // Update is called once per frame
     void Update()
@@ -80,12 +70,6 @@ public class PlayerController : MonoBehaviour
         {
             // ���ʍĐ�
             isPlaying = true;
-            foreach (var bgmController in ExistingBgmControllers)
-            {
-                bgmController.audioSource.PlayScheduled(
-                    AudioSettings.dspTime + startOffset + bgmController.bgmProperty.secBegin
-                );
-            }
         }
         // ���ʒ�~��
         if (!isPlaying)
@@ -103,7 +87,35 @@ public class PlayerController : MonoBehaviour
         CurrentSec = Time.time - startOffset - startSec;
 
         // �����X�V
-        CurrentBeat = Beatmap.ToBeat(CurrentSec, beatmap.tempoChanges);
-        // CurrentBeat = Util.ToBeat(CurrentSec);
+        CurrentBeat = Util.ToBeat(CurrentSec, BmsScore.Bpms);
+    }
+
+    void MakeObject(BMSScore BmsScore)
+    {
+        for (int lane = 0; lane < BmsScore.Lanes.Length; lane++)
+        {
+            foreach (Note note in BmsScore.Lanes[lane].NoteList)
+            {
+                GameObject objNote = null;
+                if (note is LongNote)
+                {
+                    objNote = Instantiate(prefabLongNote);
+                }
+                else
+                { // Note
+                    objNote = Instantiate(prefabSingleNote);
+                }
+                ExistingNoteControllers[lane].Add(objNote.GetComponent<NoteControllerBase>());
+                objNote.GetComponent<NoteControllerBase>().note = note;
+                objNote.GetComponent<NoteControllerBase>().lane = lane;
+            }
+        }
+
+        foreach (BGNote note in BmsScore.BGSounds)
+        {
+            GameObject bgObj = Instantiate(prefabBgmObject);
+            ExistingBGSoundControllers.Add(bgObj.GetComponent<BgmController>());
+            bgObj.GetComponent<BgmController>().note = note;
+        }
     }
 }

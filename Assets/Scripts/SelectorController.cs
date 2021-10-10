@@ -99,7 +99,8 @@ public class SelectorController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             PlayerController.ScrollSpeed = scrollSpeed;
-            PlayerController.beatmap = new Beatmap(beatmapPaths[selectedIndex]);
+            PlayerController.BmsHeader = selectedBmsLoader.BmsHeader;
+            PlayerController.BmsScore = selectedBmsLoader.BmsScore;
             SceneManager.LoadScene("PlayScene");
         }
     }
@@ -111,14 +112,13 @@ public class SelectorController : MonoBehaviour
         selectedBmsLoader = bmsLoaders[selectedIndex];
 
         // �y�ȏ��
-        var title = selectedBmsLoader.headerData["TITLE"];
-        var artist = selectedBmsLoader.headerData["ARTIST"];
-        var playLevel = selectedBmsLoader.headerData["PLAYLEVEL"];
-        var notesCount = selectedBmsLoader.noteProperties.Count(x => x.noteType == NoteType.Single) +
-            selectedBmsLoader.noteProperties.Count(x => x.noteType == NoteType.Long) * 2;
+        var title = selectedBmsLoader.BmsHeader.Title;
+        var artist = selectedBmsLoader.BmsHeader.Artist;
+        var playLevel = selectedBmsLoader.BmsHeader.Artist;
+        var notesCount = selectedBmsLoader.BmsScore.NoteCount;
 
-        var minBpm = selectedBmsLoader.tempoChanges.Min(x => x.tempo);
-        var maxBpm = selectedBmsLoader.tempoChanges.Max(x => x.tempo);
+        var minBpm = selectedBmsLoader.BmsScore.Bpms.Min(x => x.Bpm);
+        var maxBpm = selectedBmsLoader.BmsScore.Bpms.Max(x => x.Bpm);
 
         // �e�L�X�g�ύX
         var text = string.Format(informationTextFormat,

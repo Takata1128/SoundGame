@@ -5,11 +5,13 @@ using UnityEngine;
 
 public class JudgementManager : MonoBehaviour
 {
+    public PlayerController playerController;
+
     public static Dictionary<JudgementType, float> JudgementWidth = new Dictionary<JudgementType, float> {
-        { JudgementType.Perfect, 0.05f }, // perfect‚Ì”»’è•
-        { JudgementType.Great, 0.10f }, // great‚Ì”»’è•
-        { JudgementType.Good, 0.20f }, // good‚Ì”»’è•
-        { JudgementType.Bad, 0.30f }, // bad‚Ì”»’è•
+        { JudgementType.Perfect, 0.05f }, // perfectï¿½Ì”ï¿½ï¿½è•
+        { JudgementType.Great, 0.10f }, // greatï¿½Ì”ï¿½ï¿½è•
+        { JudgementType.Good, 0.20f }, // goodï¿½Ì”ï¿½ï¿½è•
+        { JudgementType.Bad, 0.30f }, // badï¿½Ì”ï¿½ï¿½è•
     };
 
     private static KeyCode[] InputKeys = new KeyCode[]
@@ -21,91 +23,156 @@ public class JudgementManager : MonoBehaviour
             KeyCode.J,
             KeyCode.K,
             KeyCode.L,
+            KeyCode.Space,
+            KeyCode.RightShift
         };
 
     // Update is called once per frame
-    void Update() {
-        // ŠeƒŒ[ƒ“‚É‘Î‚µ‚Äˆ—
-        for (int lane = 0; lane < InputKeys.Length; lane++) {
-            // ƒŒ[ƒ“‚É‘Î‰‚·‚éƒL[
-            var inputKey = InputKeys[lane];
+    void Update()
+    {
+        CheckBG();
+        CheckMiss();
+        CheckInput();
+    }
 
-            // ƒL[‚ğ‰Ÿ‰º‚µ‚½
-            if (Input.GetKeyDown(inputKey)) {
-                // Å‹ß–Tƒm[ƒc
+    private void CheckBG()
+    {
+        while (PlayerController.ExistingBGSoundControllers.Any() && PlayerController.ExistingBGSoundControllers.Back.note.SecBegin < PlayerController.CurrentSec)
+        {
+            BgmController bgmController = PlayerController.ExistingBGSoundControllers.Back;
+            playerController.SoundManager.PlayKeySound(bgmController.note.KeySound);
+            Destroy(bgmController.gameObject);
+            PlayerController.ExistingBGSoundControllers.Pop();
+        }
+    }
+
+    private void CheckMiss()
+    {
+        for (int lane = 1; lane < 9; lane++)
+        {
+            if (PlayerController.ExistingNoteControllers[lane].Count == 0) continue;
+            var noteController = PlayerController.ExistingNoteControllers[lane].Back;
+            if (noteController.CheckMiss())
+            {
+                Destroy(noteController.gameObject);
+                PlayerController.ExistingNoteControllers[lane].Pop();
+            }
+
+        }
+    }
+
+    private void CheckInput()
+    {
+        // ï¿½eï¿½ï¿½ï¿½[ï¿½ï¿½ï¿½É‘Î‚ï¿½ï¿½Äï¿½ï¿½ï¿½
+        for (int lane = 1; lane < 9; lane++)
+        {
+            // ï¿½ï¿½ï¿½[ï¿½ï¿½ï¿½É‘Î‰ï¿½ï¿½ï¿½ï¿½ï¿½Lï¿½[
+            var inputKey = InputKeys[lane - 1];
+
+            // ï¿½Lï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+            if (Input.GetKeyDown(inputKey))
+            {
+                // ï¿½Å‹ß–Tï¿½mï¿½[ï¿½c
                 var nearest = GetNearestNoteControllerBaseInLane(lane);
                 if (!nearest) continue;
 
-                // ˆ—‚·‚×‚«ƒ^ƒCƒ~ƒ“ƒO
-                var noteSec = nearest.noteProperty.secBegin;
-                // ÀÛ‚É‰Ÿ‚µ‚½ƒ^ƒCƒ~ƒ“ƒO‚Æ‚Ì·•ª
+                // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×‚ï¿½ï¿½^ï¿½Cï¿½~ï¿½ï¿½ï¿½O
+                var noteSec = nearest.note.SecBegin;
+                // ï¿½ï¿½ï¿½Û‚É‰ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½^ï¿½Cï¿½~ï¿½ï¿½ï¿½Oï¿½Æ‚Ìï¿½ï¿½ï¿½
                 var differenceSec = Mathf.Abs(noteSec - PlayerController.CurrentSec);
+                // ï¿½ï¿½ï¿½èˆï¿½ï¿½
+                var judge = GetJudgementType(differenceSec);
 
-                // ”»’èˆ—
-                nearest.OnKeyDown(GetJudgementType(differenceSec));
+                nearest.OnKeyDown(judge);
+                playerController.SoundManager.PlayKeySound(nearest.note.KeySound);
+
+                if (judge != JudgementType.Poor)
+                {
+                    Destroy(nearest.gameObject);
+                    PlayerController.ExistingNoteControllers[lane].Pop();
+                }
             }
-            // ƒL[‚ğ—£‚µ‚½
-            else if (Input.GetKeyUp(inputKey)) {
-                // ˆ—’†‚Ìƒm[ƒc
+            // ï¿½Lï¿½[ï¿½ğ—£‚ï¿½ï¿½ï¿½ï¿½ï¿½
+            else if (Input.GetKeyUp(inputKey))
+            {
+                // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ìƒmï¿½[ï¿½c
                 var processed = GetProcessedNoteControllerBaseInLane(lane);
                 if (!processed) continue;
 
-                // ˆ—‚·‚×‚«ƒ^ƒCƒ~ƒ“ƒO
-                var noteSec = processed.noteProperty.secEnd;
-                // ÀÛ‚É—£‚µ‚½ƒ^ƒCƒ~ƒ“ƒO‚Æ‚Ì·•ª
+                // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×‚ï¿½ï¿½^ï¿½Cï¿½~ï¿½ï¿½ï¿½O
+                var noteSec = processed.note.SecEnd;
+                // ï¿½ï¿½ï¿½Û‚É—ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½^ï¿½Cï¿½~ï¿½ï¿½ï¿½Oï¿½Æ‚Ìï¿½ï¿½ï¿½
                 var differenceSec = Mathf.Abs(noteSec - PlayerController.CurrentSec);
 
-                // ”»’èˆ—
-                processed.OnKeyUp(GetJudgementType(differenceSec));
+                var judge = GetJudgementType(differenceSec);
+
+                // ï¿½ï¿½ï¿½èˆï¿½ï¿½
+                processed.OnKeyUp(judge);
+                playerController.SoundManager.PlayKeySound(processed.note.KeySound);
+                if (judge != JudgementType.Poor)
+                {
+                    Destroy(processed.gameObject);
+                    PlayerController.ExistingNoteControllers[lane].Pop();
+                }
             }
         }
     }
 
-    private JudgementType GetJudgementType(float differenceSec) {
+    private JudgementType GetJudgementType(float differenceSec)
+    {
         // Perfect
-        if (differenceSec <= JudgementWidth[JudgementType.Perfect]) {
+        if (differenceSec <= JudgementWidth[JudgementType.Perfect])
+        {
             return JudgementType.Perfect;
         }
         // Great
-        else if (differenceSec <= JudgementWidth[JudgementType.Great]) {
+        else if (differenceSec <= JudgementWidth[JudgementType.Great])
+        {
             return JudgementType.Great;
         }
         // Good
-        else if (differenceSec <= JudgementWidth[JudgementType.Good]) {
+        else if (differenceSec <= JudgementWidth[JudgementType.Good])
+        {
             return JudgementType.Good;
         }
         // Bad
-        else if (differenceSec <= JudgementWidth[JudgementType.Bad]) {
+        else if (differenceSec <= JudgementWidth[JudgementType.Bad])
+        {
             return JudgementType.Bad;
         }
         // Other
-        else {
+        else
+        {
             return JudgementType.Poor;
         }
 
 
     }
 
-    private NoteControllerBase GetNearestNoteControllerBaseInLane(int lane) {
-        // w’è‚µ‚½ƒŒ[ƒ““à‚Ìƒm[ƒc
-        var noteControllers = PlayerController.ExistingNoteControllers.Where(x => x.noteProperty.lane == lane);
+    private NoteControllerBase GetNearestNoteControllerBaseInLane(int lane)
+    {
+        // ï¿½wï¿½è‚µï¿½ï¿½ï¿½ï¿½ï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½Ìƒmï¿½[ï¿½c
+        var noteControllers = PlayerController.ExistingNoteControllers[lane];
 
-        // ƒm[ƒc‚ª‘¶İ
-        if (noteControllers.Any()) {
-            // beat‚Ì·‚Ìâ‘Î’l‚ªÅ‚à¬‚³‚¢‚à‚Ì‚ğ•Ô‚·
-            return noteControllers.OrderBy(x => Mathf.Abs(x.noteProperty.beatBegin - PlayerController.CurrentBeat)).First();
+        // ï¿½mï¿½[ï¿½cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        if (noteControllers.Any())
+        {
+            // beatï¿½Ìï¿½ï¿½Ìï¿½Î’lï¿½ï¿½ï¿½Å‚ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì‚ï¿½Ô‚ï¿½
+            return noteControllers.Back;
         }
         return null;
     }
 
-    private NoteControllerBase GetProcessedNoteControllerBaseInLane(int lane) {
-        // w’è‚µ‚½ƒŒ[ƒ““à‚Ìƒm[ƒc
-        var noteControllers = PlayerController.ExistingNoteControllers.Where(x => x.noteProperty.lane == lane && x.isProcessed);
+    private NoteControllerBase GetProcessedNoteControllerBaseInLane(int lane)
+    {
+        // ï¿½wï¿½è‚µï¿½ï¿½ï¿½ï¿½ï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½Ìƒmï¿½[ï¿½c
+        var noteControllers = PlayerController.ExistingNoteControllers[lane].Where(x => x.isProcessed);
 
-        // ƒm[ƒc‚ª‘¶İ
-        if (noteControllers.Any()) {
-            // beat‚Ì·‚Ìâ‘Î’l‚ªÅ‚à¬‚³‚¢‚à‚Ì‚ğ•Ô‚·
-            return noteControllers.OrderBy(x => Mathf.Abs(x.noteProperty.beatBegin - PlayerController.CurrentBeat)).First();
+        // ï¿½mï¿½[ï¿½cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        if (noteControllers.Any())
+        {
+            // beatï¿½Ìï¿½ï¿½Ìï¿½Î’lï¿½ï¿½ï¿½Å‚ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì‚ï¿½Ô‚ï¿½
+            return noteControllers.OrderBy(x => Mathf.Abs(x.note.BeatBegin - PlayerController.CurrentBeat)).First();
         }
         return null;
     }

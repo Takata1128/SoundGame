@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 public class BMSHeader : IComparable<BMSHeader>
 {
@@ -19,6 +20,7 @@ public class BMSHeader : IComparable<BMSHeader>
 
     public float Bpm { get; set; } = 0f;
 
+    public Dictionary<int, string> SoundPathes { get; set; }
 
     public int CompareTo(BMSHeader h)
     {

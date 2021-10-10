@@ -4,27 +4,31 @@ using UnityEngine;
 public class BMSScore
 {
     public int NoteCount { get; set; } = 0;
-    public MyList<Note> BGSounds { get; set; }
+    public List<BGNote> BGSounds { get; set; }
 
-    public MyList<BPM> Bpms { get; set; }
+    public List<BPM> Bpms { get; set; }
     public Lane[] Lanes { get; set; }
 
     public BMSScore()
     {
-        Bpms = new MyList<BPM>();
-        BGSounds = new MyList<Note>();
-        Lanes = new Lane[9];
-        for (int i = 0; i < 9; i++) Lanes[i] = new Lane();
+        Bpms = new List<BPM>();
+        BGSounds = new List<BGNote>();
+        Lanes = new Lane[10];
+        for (int i = 0; i < 10; i++) Lanes[i] = new Lane();
     }
 
     public void SetNotesSec()
     {
         for (int i = 0; i < Lanes.Length; i++)
         {
-            foreach (Note note in Lanes[i].NoteList)
+            for (int j = 0; j < Lanes[i].NoteList.Count; j++)
             {
-                note.SetSec(Bpms);
+                Lanes[i].NoteList[j].SecBegin = Util.ToSec(Lanes[i].NoteList[j].BeatBegin, Bpms);
             }
+        }
+        for (int i = 0; i < BGSounds.Count; i++)
+        {
+            BGSounds[i].SecBegin = Util.ToSec(BGSounds[i].BeatBegin, Bpms);
         }
     }
 

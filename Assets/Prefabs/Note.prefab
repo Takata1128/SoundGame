@@ -108,5 +108,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3d9628d235b15bd4aba6b401f357668e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  lane: 0
   isProcessed: 0
-  clipHit: {fileID: 8300000, guid: f6347a58c468c1b45a90b2dd028d2943, type: 3}
+  prefabBurst: {fileID: 100000, guid: 624359039ddfc43a6b27f8c6c1cc5499, type: 3}
+  deleteTime: 1
+  burstSize: 0.1

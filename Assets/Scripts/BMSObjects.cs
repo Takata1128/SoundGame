@@ -2,10 +2,10 @@ using System.Collections.Generic;
 
 public class Lane
 {
-    public MyList<Note> NoteList;
+    public List<Note> NoteList;
     public Lane()
     {
-        NoteList = new MyList<Note>();
+        NoteList = new List<Note>();
     }
 }
 
@@ -33,24 +33,17 @@ public abstract class BMSObject : System.IComparable<BMSObject>
 public class Note : BMSObject
 {
     public int KeySound { get; private set; }
+    public float BeatEnd;
+    public float SecEnd;
 
     public Note(int keySound, float beatBegin) : base(beatBegin)
     {
         KeySound = keySound;
     }
-
-    public void SetSec(List<BPM> bpms)
-    {
-        SecBegin = Util.ToSec(BeatBegin, bpms);
-    }
 }
 
 public class LongNote : Note
 {
-
-    public float BeatEnd;
-    public float SecEnd;
-
     public new void SetSec(List<BPM> bpms)
     {
         SecBegin = Util.ToSec(BeatBegin, bpms);

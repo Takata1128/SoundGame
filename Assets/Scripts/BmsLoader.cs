@@ -20,24 +20,27 @@ public class BmsLoader
         @"#(BPM) (.*)",
         @"#(BPM[0-9A-Z]{2}) (.*)",
         @"#(PLAYLEVEL) (.*)",
-        @"#(RANK) (.*)",
-        @"#(WAV[0-9A-Z]{2}) (.*)" // #WAV00~ZZ
+        @"#(RANK) (.*)"
+    };
+
+    private static string SoundPattern =
+        @"#WAV([0-9A-Z]{2}) (.*)"; // #WAV00~ZZ
+
+    private static Dictionary<char, int> LanePairs = new Dictionary<char, int>(){
+        {'1',1},
+        {'2',2},
+        {'3',3},
+        {'4',4},
+        {'5',5},
+        {'6',8},
+        {'8',6},
+        {'9',7},
     };
 
     public BMSHeader BmsHeader = new BMSHeader();
 
-    public BMSScore BMSScore = new BMSScore();
+    public BMSScore BmsScore = new BMSScore();
 
-
-    private static Dictionary<char, int> LanePairs = new Dictionary<char, int> {
-        {'1',0 },
-        {'2',1 },
-        {'3',2 },
-        {'4',3 },
-        {'5',4 },
-        {'6',5 },
-        {'7',6 }
-    };
 
     // �w�b�_�[���A�f�[�^
     public Dictionary<string, string> headerData = new Dictionary<string, string>() {
@@ -49,21 +52,15 @@ public class BmsLoader
         { "BPM","0"}
     };
 
-    // �m�[�c���
-    public List<NoteProperty> noteProperties = new List<NoteProperty>();
+    public Dictionary<int, string> SoundPathes = new Dictionary<int, string>();
 
-    // Bgm���
-    public List<BgmProperty> bgmProperties = new List<BgmProperty>();
-
-    // �e���|�ω����
-    public List<TempoChange> tempoChanges = new List<TempoChange>();
 
     // �e�����̒���(beat�P��,4��4����4���q)
     public float[] measureLength = Enumerable.Repeat(4f, 1000).ToArray();
 
     // �e���[���ōŌ��LN��ON�ɂȂ���beat
-    private float[] longNoteBeginBuffers = new float[] { -1, -1, -1, -1, -1, -1, -1, -1, -1 };
-    private int[] longNoteSoundBuffers = new int[] { -1, -1, -1, -1, -1, -1, -1, -1, -1 };
+    private float[] longNoteBeginBuffers = new float[] { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
+    private int[] longNoteSoundBuffers = new int[] { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
 
 
 
@@ -71,6 +68,7 @@ public class BmsLoader
     public BmsLoader(string filePath)
     {
         BmsHeader.Path = filePath;
+        BmsHeader.ParentPath = System.IO.Path.GetDirectoryName(filePath);
 
         // BMS�t�@�C����ǂݍ��݁A�e�s��ێ�
         var lines = File.ReadAllLines(filePath, Encoding.UTF8);
@@ -80,12 +78,11 @@ public class BmsLoader
             LoadHeaderLine(line);
         }
 
-        // ��{BPM��beat0�̎���BPM�Ƃ��Đݒ�
-        tempoChanges.Add(
-            new TempoChange(0, Convert.ToSingle(headerData["BPM"]))
-        );
+        SetBmsHeader();
+        BmsHeader.SoundPathes = SoundPathes;
 
-        BMSScore.AddBPM(
+
+        BmsScore.AddBPM(
             new BPM(Convert.ToSingle(headerData["BPM"]), 0f)
         );
 
@@ -94,44 +91,59 @@ public class BmsLoader
             LoadMainDataLine(line);
         }
 
-
-        // �e���|�ω��f�[�^�����n�񏇂ɕ��ёւ�
-        tempoChanges = tempoChanges.OrderBy(x => x.beat).ToList();
-
-        // �e�m�[�c�ɑ΂��Asec�̐ݒ���s��
-        foreach (var noteProperty in noteProperties)
+        // ノーツソート
+        foreach (Lane lane in BmsScore.Lanes)
         {
-            noteProperty.secBegin = Beatmap.ToSec(noteProperty.beatBegin, tempoChanges);
-            noteProperty.secEnd = Beatmap.ToSec(noteProperty.beatEnd, tempoChanges);
+            lane.NoteList = lane.NoteList.OrderBy(x => -x.BeatBegin).ToList();
         }
 
-        // �eBgm�I�u�W�F�N�g�ɑ΂��Asec�̐ݒ���s��
-        foreach (var bgmProperty in bgmProperties)
-        {
-            bgmProperty.secBegin = Beatmap.ToSec(bgmProperty.beatBegin, tempoChanges);
-        }
+        // BGMソート
+        BmsScore.BGSounds = BmsScore.BGSounds.OrderBy(x => -x.BeatBegin).ToList();
+
+        // Bpmソート
+        BmsScore.Bpms = BmsScore.Bpms.OrderBy(x => x.BeatBegin).ToList();
+
+        BmsScore.SetNotesSec();
+
+        BmsScore.Bpms = BmsScore.Bpms.OrderBy(x => -x.BeatBegin).ToList();
+
     }
 
     // �w�b�_�[�s�̂ݓǂݍ���
     private void LoadHeaderLine(string line)
     {
-        foreach (var headerPattern in HeaderPatterns)
+        Match wavMatch = Regex.Match(line, SoundPattern);
+
+        if (wavMatch.Success)
         {
-            Match match = Regex.Match(line, headerPattern);
-            if (match.Success)
+            var index = Util.Decode(wavMatch.Groups[1].Value);
+            var path = wavMatch.Groups[2].Value;
+            SoundPathes[index] = path;
+        }
+        else
+        {
+            foreach (var headerPattern in HeaderPatterns)
             {
-                // �w�b�_�[��
-                var headerName = match.Groups[1].Value;
-                // �f�[�^�{��
-                var data = match.Groups[2].Value;
-                headerData[headerName] = data;
-                Debug.Log(headerName + ": " + data);
-                return;
+                Match match = Regex.Match(line, headerPattern);
+                if (match.Success)
+                {
+                    // �w�b�_�[��
+                    var headerName = match.Groups[1].Value;
+                    // �f�[�^�{��
+                    var data = match.Groups[2].Value;
+                    headerData[headerName] = data;
+                    Debug.Log(headerName + ": " + data);
+                    return;
+                }
             }
         }
 
-        // Initialize BmsHeader
 
+    }
+
+    private void SetBmsHeader()
+    {
+        // Initialize BmsHeader
         if (headerData.ContainsKey("PLAYER"))
         {
             BmsHeader.Player = Util.Decode(headerData["PLAYER"]);
@@ -214,14 +226,17 @@ public class BmsLoader
                     if (dataType == DataType.SingleNote || dataType == DataType.LongNote)
                     {
                         // ���[���ԍ�(�`�����l���ԍ��̈�̈�)
-                        if (!LanePairs.ContainsKey(channel[1])) continue;
+                        if (!LanePairs.ContainsKey(channel[1]))
+                        {
+                            Debug.Log($"Invalid LaneChannel: {BmsHeader.Title}, channel={channel[1]}");
+                            continue;
+                        }
                         int lane = LanePairs[channel[1]];
 
                         switch (dataType)
                         {
                             case DataType.SingleNote: // �V���O���m�[�c
-                                // noteProperties.Add(new NoteProperty(beat, beat, lane, NoteType.Single));
-                                BMSScore.AddNote(lane, beat, Util.Decode(objNum));
+                                BmsScore.AddNote(lane, beat, Util.Decode(objNum));
                                 break;
                             case DataType.LongNote: // �����O�m�[�c
                                 if (longNoteBeginBuffers[lane] < 0)
@@ -233,7 +248,7 @@ public class BmsLoader
                                 else
                                 {
                                     // noteProperties.Add(new NoteProperty(longNoteBeginBuffers[lane], beat, lane, NoteType.Long));
-                                    BMSScore.AddLongNote(lane, longNoteBeginBuffers[lane], beat, longNoteSoundBuffers[lane], Util.Decode(objNum));
+                                    BmsScore.AddLongNote(lane, longNoteBeginBuffers[lane], beat, longNoteSoundBuffers[lane], Util.Decode(objNum));
                                     longNoteBeginBuffers[lane] = -1;
                                     longNoteSoundBuffers[lane] = -1;
                                 }
@@ -246,21 +261,21 @@ public class BmsLoader
                     {
                         // 16�i��BPM��10�i����
                         float bpm = Convert.ToInt32(objNum, 16);
-                        BMSScore.AddBPM(beat, bpm);
+                        BmsScore.AddBPM(beat, bpm);
                     }
                     // �C���f�b�N�X�w��^�C�v�̃e���|�ω�
                     else if (dataType == DataType.IndexedTempoChange)
                     {
                         // headerData��"BPMxx"�Ƃ����L�[�����l�������ɕϊ�
                         float bpm = Convert.ToSingle(headerData["BPM" + objNum]);
-                        BMSScore.AddBPM(beat, bpm);
+                        BmsScore.AddBPM(beat, bpm);
                     }
                     // BGM
                     else if (dataType == DataType.Bgm)
                     {
                         string index = objNum;
                         // bgmProperties.Add(new BgmProperty(beat, index));
-                        BMSScore.AddNote(0, beat, Util.Decode(objNum));
+                        BmsScore.AddBGSound(beat, Util.Decode(objNum));
                     }
                 }
             }

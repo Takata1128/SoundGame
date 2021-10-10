@@ -4,8 +4,16 @@ using UnityEngine;
 
 public class NoteControllerBase : MonoBehaviour
 {
-    public NoteProperty noteProperty;
-    public bool isProcessed = false; // ƒƒ“ƒOƒm[ƒcˆ—’†ƒtƒ‰ƒO
+    public int lane;
+    public Note note;
+    public bool isProcessed = false; // ï¿½ï¿½ï¿½ï¿½ï¿½Oï¿½mï¿½[ï¿½cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½tï¿½ï¿½ï¿½O
+
+    // Update is called once per frame
+    [SerializeField] protected GameObject prefabBurst;
+    [SerializeField] protected float deleteTime;
+    [SerializeField] protected float burstSize;
+
+    public virtual bool CheckMiss() { return false; }
 
     public virtual void OnKeyDown(JudgementType judgementType) { }
     public virtual void OnKeyUp(JudgementType judgementType) { }
