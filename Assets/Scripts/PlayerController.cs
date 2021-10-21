@@ -19,6 +19,7 @@ public class PlayerController : MonoBehaviour
 
     public static MyList<BgmController> ExistingBGSoundControllers;
 
+    public static List<BmsLoader> BmsLoaders;
     public static BMSHeader BmsHeader;
     public static BMSScore BmsScore;
     [SerializeField] public SoundManager SoundManager;
@@ -65,28 +66,21 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // ���ʒ�~���ɃX�y�[�X���������Ƃ�
         if (!isPlaying && Input.GetKeyDown(KeyCode.Space))
         {
-            // ���ʍĐ�
             isPlaying = true;
         }
-        // ���ʒ�~��
         if (!isPlaying)
         {
-            // startSec�X�V
             startSec = Time.time;
         }
-        // �Q�[���I��
         if (Input.GetKeyDown(KeyCode.Escape))
         {
+            SelectorController.BmsLoaders = BmsLoaders;
             SceneManager.LoadScene("SelectScene");
         }
 
-        // �b�����X�V
         CurrentSec = Time.time - startOffset - startSec;
-
-        // �����X�V
         CurrentBeat = Util.ToBeat(CurrentSec, BmsScore.Bpms);
     }
 

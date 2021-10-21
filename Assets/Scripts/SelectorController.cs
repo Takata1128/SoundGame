@@ -19,7 +19,7 @@ public class SelectorController : MonoBehaviour
 
     // BMS�t�@�C���ꗗ
     private string[] beatmapPaths;
-    private List<BmsLoader> bmsLoaders;
+    public static List<BmsLoader> BmsLoaders;
     private BmsLoader selectedBmsLoader;
 
     // �I�𒆂̕���ID
@@ -32,36 +32,13 @@ public class SelectorController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        // �t�H���_�p�X
-        var beatmapDirectory = Application.dataPath + "/../Beatmaps";
-        // BMS�t�@�C���ꗗ�擾
-        beatmapPaths = Directory.GetFiles(beatmapDirectory, "*.bm?", SearchOption.AllDirectories);
-
-
-        // ���ʏ��ǂݍ���
-        bmsLoaders = new List<BmsLoader>();
-        for (int i = 0; i < beatmapPaths.Length; i++)
+        if (BmsLoaders == null)
         {
-            // �g���q�I��
-            string ext = Path.GetExtension(beatmapPaths[i]);
-            if (ext == ".bms" || ext == ".bme")
-            {
-                try
-                {
-                    bmsLoaders.Add(new BmsLoader(beatmapPaths[i]));
-                }
-                catch (KeyNotFoundException e)
-                {
-                    Debug.Log(beatmapPaths[i] + " �̓ǂݍ��݂ŃG���[���������܂����B");
-                    Debug.Log(e);
-                }
-            }
+            LoadBeatScores();
         }
 
-
-
-        selectedBmsLoader = bmsLoaders[selectedIndex];
-        beatmapCount = bmsLoaders.Count();
+        selectedBmsLoader = BmsLoaders[selectedIndex];
+        beatmapCount = BmsLoaders.Count();
 
         // ������Ԃ̃e�L�X�g���e
         informationTextFormat = textInformation.text;
@@ -70,6 +47,34 @@ public class SelectorController : MonoBehaviour
         // ������ԂŃe�L�X�g�X�V
         ChangeSelectedIndex(selectedIndex);
         ChangeScrollSpeed(scrollSpeed);
+    }
+
+    // 譜面の読み込み
+    void LoadBeatScores()
+    {
+        // �t�H���_�p�X
+        var beatmapDirectory = Application.dataPath + "/../Beatmaps";
+        // BMS�t�@�C���ꗗ�擾
+        beatmapPaths = Directory.GetFiles(beatmapDirectory, "*.bm?", SearchOption.AllDirectories);
+        // ���ʏ��ǂݍ���
+        BmsLoaders = new List<BmsLoader>();
+        for (int i = 0; i < beatmapPaths.Length; i++)
+        {
+            // �g���q�I��
+            string ext = Path.GetExtension(beatmapPaths[i]);
+            if (ext == ".bms" || ext == ".bme")
+            {
+                try
+                {
+                    BmsLoaders.Add(new BmsLoader(beatmapPaths[i]));
+                }
+                catch (KeyNotFoundException e)
+                {
+                    Debug.Log(beatmapPaths[i] + " �̓ǂݍ��݂ŃG���[���������܂����B");
+                    Debug.Log(e);
+                }
+            }
+        }
     }
 
     // Update is called once per frame
@@ -101,6 +106,7 @@ public class SelectorController : MonoBehaviour
             PlayerController.ScrollSpeed = scrollSpeed;
             PlayerController.BmsHeader = selectedBmsLoader.BmsHeader;
             PlayerController.BmsScore = selectedBmsLoader.BmsScore;
+            PlayerController.BmsLoaders = BmsLoaders;
             SceneManager.LoadScene("PlayScene");
         }
     }
@@ -109,7 +115,7 @@ public class SelectorController : MonoBehaviour
     private void ChangeSelectedIndex(int newIndex)
     {
         selectedIndex = Mathf.Clamp(newIndex, 0, beatmapCount - 1);
-        selectedBmsLoader = bmsLoaders[selectedIndex];
+        selectedBmsLoader = BmsLoaders[selectedIndex];
 
         // �y�ȏ��
         var title = selectedBmsLoader.BmsHeader.Title;

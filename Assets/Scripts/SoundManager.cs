@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine.Networking;
 
 
@@ -37,6 +38,18 @@ public class SoundManager : MonoBehaviour
                 filePath = filePath.Replace("#", "%23");
             }
             string url = PlayerController.BmsHeader.ParentPath + System.IO.Path.DirectorySeparatorChar + filePath;
+
+            // wav以外の拡張子の場合
+            if (!File.Exists(url))
+            {
+                url = url.Replace(".wav", ".ogg");
+            }
+            if (!File.Exists(url))
+            {
+                url = url.Replace(".ogg", ".mp3");
+            }
+
+
             AudioType type = GetAudioType(url);
             UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip("file:///" + url, type);
 
