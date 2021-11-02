@@ -19,8 +19,8 @@ public class SingleNoteController : NoteControllerBase
     private void SetTransform()
     {
         Vector3 position = new Vector3();
-        position.x = (float)lane - 4.5f;
-        position.z = (note.BeatBegin - PlayerController.CurrentBeat) * PlayerController.ScrollSpeed;
+        position.x = (float)Lane - 4.5f;
+        position.z = (Note.BeatBegin - PlayerController.CurrentBeat) * PlayerController.ScrollSpeed;
         position.y = 0.0f;
         transform.localPosition = position;
     }
@@ -29,7 +29,7 @@ public class SingleNoteController : NoteControllerBase
     public override bool CheckMiss()
     {
         // Bad�̔��蕝��ʉ�
-        if (note.SecBegin - PlayerController.CurrentSec < -JudgementManager.JudgementWidth[JudgementType.Bad])
+        if (Note.SecBegin - PlayerController.CurrentSec < -JudgementManager.JudgementWidth[JudgementType.Bad])
         {
             // �~�X����
             EvaluationManager.OnMiss();

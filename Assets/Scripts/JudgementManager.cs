@@ -45,10 +45,10 @@ public class JudgementManager : MonoBehaviour
 
     private void CheckBG()
     {
-        while (PlayerController.ExistingBGSoundControllers.Any() && PlayerController.ExistingBGSoundControllers.Back.note.SecBegin < PlayerController.CurrentSec)
+        while (PlayerController.ExistingBGSoundControllers.Any() && PlayerController.ExistingBGSoundControllers.Back.Note.SecBegin < PlayerController.CurrentSec)
         {
             BgmController bgmController = PlayerController.ExistingBGSoundControllers.Back;
-            playerController.SoundManager.PlayKeySound(bgmController.note.KeySound);
+            playerController.SoundManager.PlayKeySound(bgmController.Note.KeySound);
             Destroy(bgmController.gameObject);
             PlayerController.ExistingBGSoundControllers.Pop();
         }
@@ -86,14 +86,14 @@ public class JudgementManager : MonoBehaviour
                 if (!nearest) continue;
 
                 // �������ׂ��^�C�~���O
-                var noteSec = nearest.note.SecBegin;
+                var noteSec = nearest.Note.SecBegin;
                 // ���ۂɉ������^�C�~���O�Ƃ̍���
                 var differenceSec = Mathf.Abs(noteSec - PlayerController.CurrentSec);
                 // ���菈��
                 var judge = GetJudgementType(differenceSec);
 
                 nearest.OnKeyDown(judge);
-                playerController.SoundManager.PlayKeySound(nearest.note.KeySound);
+                playerController.SoundManager.PlayKeySound(nearest.Note.KeySound);
 
                 if (judge != JudgementType.Poor)
                 {
@@ -110,7 +110,7 @@ public class JudgementManager : MonoBehaviour
                 if (!processed) continue;
 
                 // �������ׂ��^�C�~���O
-                var noteSec = processed.note.SecEnd;
+                var noteSec = processed.Note.SecEnd;
                 // ���ۂɗ������^�C�~���O�Ƃ̍���
                 var differenceSec = Mathf.Abs(noteSec - PlayerController.CurrentSec);
 
@@ -118,7 +118,7 @@ public class JudgementManager : MonoBehaviour
 
                 // ���菈��
                 processed.OnKeyUp(judge);
-                playerController.SoundManager.PlayKeySound(processed.note.KeySound);
+                playerController.SoundManager.PlayKeySound(processed.Note.KeySound);
                 if (judge != JudgementType.Poor)
                 {
                     Destroy(processed.gameObject);
@@ -178,13 +178,13 @@ public class JudgementManager : MonoBehaviour
     private NoteControllerBase GetProcessedNoteControllerBaseInLane(int lane)
     {
         // �w�肵�����[�����̃m�[�c
-        var noteControllers = PlayerController.ExistingNoteControllers[lane].Where(x => x.isProcessed);
+        var noteControllers = PlayerController.ExistingNoteControllers[lane].Where(x => x.IsProcessed);
 
         // �m�[�c������
         if (noteControllers.Any())
         {
             // beat�̍��̐�Βl���ł����������̂�Ԃ�
-            return noteControllers.OrderBy(x => Mathf.Abs(x.note.BeatBegin - PlayerController.CurrentBeat)).First();
+            return noteControllers.OrderBy(x => Mathf.Abs(x.Note.BeatBegin - PlayerController.CurrentBeat)).First();
         }
         return null;
     }

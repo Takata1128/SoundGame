@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class NoteControllerBase : MonoBehaviour
 {
-    public int lane;
-    public Note note;
-    public bool isProcessed = false; // �����O�m�[�c�������t���O
+    public int Lane { get; set; }
+    public Note Note { get; set; }
+    public bool IsProcessed { get; set; } = false; // �����O�m�[�c�������t���O
 
     protected bool renderFlag = false;
 

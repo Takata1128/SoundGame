@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class LongNoteController : NoteControllerBase
 {
-    new LongNote note;
+    new LongNote Note { get; set; }
     [SerializeField] GameObject objBegin; // �n�_������GameObject
     [SerializeField] GameObject objTrail; // �O�Օ�����GameObject
     [SerializeField] GameObject objEnd; // �I�_������GameObject
@@ -28,16 +28,16 @@ public class LongNoteController : NoteControllerBase
     {
         // �n�_�̍��W
         Vector3 positionBegin = new Vector3();
-        positionBegin.x = (float)lane - 4.5f;
-        float zBegin = (note.BeatBegin - PlayerController.CurrentBeat) * PlayerController.ScrollSpeed;
+        positionBegin.x = (float)Lane - 4.5f;
+        float zBegin = (Note.BeatBegin - PlayerController.CurrentBeat) * PlayerController.ScrollSpeed;
         positionBegin.y = 0.0f;
-        positionBegin.z = isProcessed ? objBegin.transform.position.z : zBegin;
+        positionBegin.z = IsProcessed ? objBegin.transform.position.z : zBegin;
         objBegin.transform.localPosition = positionBegin;
 
         // �I�_�̍��W
         Vector3 positionEnd = new Vector3();
-        positionEnd.x = (float)lane - 4.5f;
-        float zEnd = (note.BeatEnd - PlayerController.CurrentBeat) * PlayerController.ScrollSpeed;
+        positionEnd.x = (float)Lane - 4.5f;
+        float zEnd = (Note.BeatEnd - PlayerController.CurrentBeat) * PlayerController.ScrollSpeed;
         positionEnd.y = 0.0f;
         positionEnd.z = zEnd;
         objEnd.transform.localPosition = positionEnd;
@@ -59,7 +59,7 @@ public class LongNoteController : NoteControllerBase
     {
 
         // �������łȂ� && �n�_��BAD���蕝�𒴂���
-        if (isProcessed && note.SecBegin - PlayerController.CurrentSec < -JudgementManager.JudgementWidth[JudgementType.Bad])
+        if (IsProcessed && Note.SecBegin - PlayerController.CurrentSec < -JudgementManager.JudgementWidth[JudgementType.Bad])
         {
             // �~�X����
             EvaluationManager.OnMiss(); // �n�_
@@ -69,12 +69,12 @@ public class LongNoteController : NoteControllerBase
         }
 
         // ������ && �I�_��BAD���蕝�𒴂���
-        if (isProcessed && note.SecEnd - PlayerController.CurrentSec < -JudgementManager.JudgementWidth[JudgementType.Bad])
+        if (IsProcessed && Note.SecEnd - PlayerController.CurrentSec < -JudgementManager.JudgementWidth[JudgementType.Bad])
         {
             // �~�X����
             EvaluationManager.OnMiss();
             // �������t���O����
-            isProcessed = false;
+            IsProcessed = false;
             Destroy(gameObject);
             return true;
         }
@@ -91,7 +91,7 @@ public class LongNoteController : NoteControllerBase
             // �q�b�g����
             EvaluationManager.OnHit(judgementType);
             // �������t���O
-            isProcessed = true;
+            IsProcessed = true;
             // �F�ύX
             objBegin.GetComponent<SpriteRenderer>().color = processedColorEdges;
             objEnd.GetComponent<SpriteRenderer>().color = processedColorEdges;
@@ -125,7 +125,7 @@ public class LongNoteController : NoteControllerBase
         }
 
         // �������t���O����
-        isProcessed = false;
+        IsProcessed = false;
 
         Destroy(gameObject);
     }

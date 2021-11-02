@@ -100,8 +100,8 @@ public class PlayerController : MonoBehaviour
                     objNote = Instantiate(prefabSingleNote);
                 }
                 ExistingNoteControllers[lane].Add(objNote.GetComponent<NoteControllerBase>());
-                objNote.GetComponent<NoteControllerBase>().note = note;
-                objNote.GetComponent<NoteControllerBase>().lane = lane;
+                objNote.GetComponent<NoteControllerBase>().Note = note;
+                objNote.GetComponent<NoteControllerBase>().Lane = lane;
             }
         }
 
@@ -109,7 +109,7 @@ public class PlayerController : MonoBehaviour
         {
             GameObject bgObj = Instantiate(prefabBgmObject);
             ExistingBGSoundControllers.Add(bgObj.GetComponent<BgmController>());
-            bgObj.GetComponent<BgmController>().note = note;
+            bgObj.GetComponent<BgmController>().Note = note;
         }
     }
 }

@@ -109,6 +109,14 @@ public class SelectorController : MonoBehaviour
             PlayerController.BmsLoaders = BmsLoaders;
             SceneManager.LoadScene("PlayScene");
         }
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#elif UNITY_STANDALONE
+            UnityEngine.Application.Quit();
+#endif
+        }
     }
 
 
