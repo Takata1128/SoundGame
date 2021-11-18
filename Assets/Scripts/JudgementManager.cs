@@ -72,28 +72,25 @@ public class JudgementManager : MonoBehaviour
 
     private void CheckInput()
     {
-        // �e���[���ɑ΂��ď���
         for (int lane = 1; lane < 9; lane++)
         {
-            // ���[���ɑΉ�����L�[
             var inputKey = InputKeys[lane - 1];
 
-            // �L�[������������
             if (Input.GetKeyDown(inputKey))
             {
-                // �ŋߖT�m�[�c
+                // キービーム(TODO リッチにする)
+                if (lane <= 7)
+                    GameObject.Find("TapPosition" + (lane - 1).ToString()).GetComponent<Renderer>().material.color = Color.blue;
+
+                // 最近のノーツを処理
                 var nearest = GetNearestNoteControllerBaseInLane(lane);
                 if (!nearest) continue;
-
-                // �������ׂ��^�C�~���O
                 var noteSec = nearest.Note.SecBegin;
-                // ���ۂɉ������^�C�~���O�Ƃ̍���
                 var differenceSec = Mathf.Abs(noteSec - PlayerController.CurrentSec);
-                // ���菈��
                 var judge = GetJudgementType(differenceSec);
-
                 nearest.OnKeyDown(judge);
                 playerController.SoundManager.PlayKeySound(nearest.Note.KeySound);
+
 
                 if (judge != JudgementType.Poor)
                 {
@@ -102,21 +99,20 @@ public class JudgementManager : MonoBehaviour
                 }
                 judgementUIManager.ShowJudge(judge);
             }
-            // �L�[�𗣂�����
             else if (Input.GetKeyUp(inputKey))
             {
-                // �������̃m�[�c
+                // キービーム(TODO リッチにする)
+                if (lane <= 7)
+                    GameObject.Find("TapPosition" + (lane - 1).ToString()).GetComponent<Renderer>().material.color = Color.red;
+
                 var processed = GetProcessedNoteControllerBaseInLane(lane);
                 if (!processed) continue;
 
-                // �������ׂ��^�C�~���O
                 var noteSec = processed.Note.SecEnd;
-                // ���ۂɗ������^�C�~���O�Ƃ̍���
                 var differenceSec = Mathf.Abs(noteSec - PlayerController.CurrentSec);
 
                 var judge = GetJudgementType(differenceSec);
 
-                // ���菈��
                 processed.OnKeyUp(judge);
                 playerController.SoundManager.PlayKeySound(processed.Note.KeySound);
                 if (judge != JudgementType.Poor)

@@ -1,26 +1,25 @@
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.SceneManagement; // �V�[���J�ڂɕK�v
-using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+using TMPro;
 
 public class SelectorController : MonoBehaviour
 {
-    [SerializeField] private Text textInformation;
-    [SerializeField] private Text textScrollSpeed;
+    // [SerializeField] private Text textInformation;
+    [SerializeField] private TextMeshProUGUI textScrollSpeed;
 
     // �t�H�[�}�b�g�w�蕶����
-    private string informationTextFormat;
+    // private string informationTextFormat;
     private string scrollSpeedTextFormat;
 
     // �X�N���[�����x
-    private float scrollSpeed = 5.0f;
+
+    private GameObject tableViewObject;
+
+    private SongItemTableViewController tableViewController;
 
     // BMS�t�@�C���ꗗ
-    private string[] beatmapPaths;
-    public static List<BmsLoader> BmsLoaders;
-    private BmsLoader selectedBmsLoader;
+    private BmsData selectedBmsData;
 
     // �I�𒆂̕���ID
     private int selectedIndex = 0;
@@ -32,81 +31,36 @@ public class SelectorController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if (BmsLoaders == null)
-        {
-            LoadBeatScores();
-        }
+        selectedBmsData = BmsDataCenter.CachedBmsDataList[selectedIndex];
+        beatmapCount = BmsDataCenter.CachedBmsDataList.Count();
 
-        selectedBmsLoader = BmsLoaders[selectedIndex];
-        beatmapCount = BmsLoaders.Count();
-
-        // ������Ԃ̃e�L�X�g���e
-        informationTextFormat = textInformation.text;
         scrollSpeedTextFormat = textScrollSpeed.text;
-
-        // ������ԂŃe�L�X�g�X�V
-        ChangeSelectedIndex(selectedIndex);
-        ChangeScrollSpeed(scrollSpeed);
+        ChangeScrollSpeed(BmsDataCenter.ScrollSpeed);
+        tableViewObject = GameObject.Find("Table View");
+        tableViewController = tableViewObject.GetComponent<SongItemTableViewController>();
+        tableViewController.LoadData(BmsDataCenter.CachedBmsDataList);
     }
 
-    // 譜面の読み込み
-    void LoadBeatScores()
-    {
-        // �t�H���_�p�X
-        var beatmapDirectory = Application.dataPath + "/../Beatmaps";
-        // BMS�t�@�C���ꗗ�擾
-        beatmapPaths = Directory.GetFiles(beatmapDirectory, "*.bm?", SearchOption.AllDirectories);
-        // ���ʏ��ǂݍ���
-        BmsLoaders = new List<BmsLoader>();
-        for (int i = 0; i < beatmapPaths.Length; i++)
-        {
-            // �g���q�I��
-            string ext = Path.GetExtension(beatmapPaths[i]);
-            if (ext == ".bms" || ext == ".bme")
-            {
-                try
-                {
-                    BmsLoaders.Add(new BmsLoader(beatmapPaths[i]));
-                }
-                catch (KeyNotFoundException e)
-                {
-                    Debug.Log(beatmapPaths[i] + " �̓ǂݍ��݂ŃG���[���������܂����B");
-                    Debug.Log(e);
-                }
-            }
-        }
-    }
+
 
     // Update is called once per frame
     void Update()
     {
-        // ����ID�ύX
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
-        {
-            ChangeSelectedIndex(selectedIndex - 1);
-        }
-        if (Input.GetKeyDown(KeyCode.RightArrow))
-        {
-            ChangeSelectedIndex(selectedIndex + 1);
-        }
-
         // �X�N���[�����x�ύX
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
-            ChangeScrollSpeed(scrollSpeed + 0.1f);
+            ChangeScrollSpeed(BmsDataCenter.ScrollSpeed + 0.1f);
         }
         if (Input.GetKeyDown(KeyCode.DownArrow))
         {
-            ChangeScrollSpeed(scrollSpeed - 0.1f);
+            ChangeScrollSpeed(BmsDataCenter.ScrollSpeed - 0.1f);
         }
 
         // ���菈��
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            PlayerController.ScrollSpeed = scrollSpeed;
-            PlayerController.BmsHeader = selectedBmsLoader.BmsHeader;
-            PlayerController.BmsScore = selectedBmsLoader.BmsScore;
-            PlayerController.BmsLoaders = BmsLoaders;
+            PlayerController.ScrollSpeed = BmsDataCenter.ScrollSpeed;
+            PlayerController.BmsData = BmsDataCenter.CachedBmsDataList[tableViewController.SelectedIndex];
             SceneManager.LoadScene("PlayScene");
         }
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -119,33 +73,11 @@ public class SelectorController : MonoBehaviour
         }
     }
 
-
-    private void ChangeSelectedIndex(int newIndex)
-    {
-        selectedIndex = Mathf.Clamp(newIndex, 0, beatmapCount - 1);
-        selectedBmsLoader = BmsLoaders[selectedIndex];
-
-        // �y�ȏ��
-        var title = selectedBmsLoader.BmsHeader.Title;
-        var artist = selectedBmsLoader.BmsHeader.Artist;
-        var playLevel = selectedBmsLoader.BmsHeader.Artist;
-        var notesCount = selectedBmsLoader.BmsScore.NoteCount;
-
-        var minBpm = selectedBmsLoader.BmsScore.Bpms.Min(x => x.Bpm);
-        var maxBpm = selectedBmsLoader.BmsScore.Bpms.Max(x => x.Bpm);
-
-        // �e�L�X�g�ύX
-        var text = string.Format(informationTextFormat,
-            title, artist, playLevel, notesCount, minBpm, maxBpm);
-        textInformation.text = text;
-
-    }
-
     private void ChangeScrollSpeed(float newScrollSpeed)
     {
-        scrollSpeed = Mathf.Clamp(newScrollSpeed, 0.1f, 10f);
+        BmsDataCenter.ScrollSpeed = Mathf.Clamp(newScrollSpeed, 0.1f, 10f);
 
-        var text = string.Format(scrollSpeedTextFormat, scrollSpeed);
+        var text = string.Format(scrollSpeedTextFormat, BmsDataCenter.ScrollSpeed);
         textScrollSpeed.text = text;
     }
 }

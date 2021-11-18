@@ -136,7 +136,7 @@ GameObject:
   - component: {fileID: 8885320}
   - component: {fileID: 8885319}
   m_Layer: 0
-  m_Name: TapPosition
+  m_Name: TapPosition2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -231,7 +231,7 @@ GameObject:
   - component: {fileID: 178205602}
   - component: {fileID: 178205601}
   m_Layer: 0
-  m_Name: TapPosition
+  m_Name: TapPosition6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -836,7 +836,7 @@ GameObject:
   - component: {fileID: 768465927}
   - component: {fileID: 768465926}
   m_Layer: 0
-  m_Name: Lane (1)
+  m_Name: Lane2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1094,7 +1094,7 @@ GameObject:
   - component: {fileID: 1113748365}
   - component: {fileID: 1113748364}
   m_Layer: 0
-  m_Name: TapPosition
+  m_Name: TapPosition3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1372,7 +1372,7 @@ GameObject:
   - component: {fileID: 1481510516}
   - component: {fileID: 1481510515}
   m_Layer: 0
-  m_Name: Lane (6)
+  m_Name: Lane9
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1468,7 +1468,7 @@ GameObject:
   - component: {fileID: 1551262005}
   - component: {fileID: 1551262004}
   m_Layer: 0
-  m_Name: TapPosition
+  m_Name: TapPosition1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1563,7 +1563,7 @@ GameObject:
   - component: {fileID: 1569414338}
   - component: {fileID: 1569414337}
   m_Layer: 0
-  m_Name: TapPosition
+  m_Name: TapPosition0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1702,7 +1702,7 @@ GameObject:
   - component: {fileID: 1851301146}
   - component: {fileID: 1851301145}
   m_Layer: 0
-  m_Name: Lane (5)
+  m_Name: Lane8
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1798,7 +1798,7 @@ GameObject:
   - component: {fileID: 1888460425}
   - component: {fileID: 1888460424}
   m_Layer: 0
-  m_Name: TapPosition
+  m_Name: TapPosition5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1893,7 +1893,7 @@ GameObject:
   - component: {fileID: 1917853267}
   - component: {fileID: 1917853266}
   m_Layer: 0
-  m_Name: Lane (4)
+  m_Name: Lane5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1989,7 +1989,7 @@ GameObject:
   - component: {fileID: 1942636416}
   - component: {fileID: 1942636415}
   m_Layer: 0
-  m_Name: Lane (2)
+  m_Name: Lane3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2085,7 +2085,7 @@ GameObject:
   - component: {fileID: 1943505880}
   - component: {fileID: 1943505879}
   m_Layer: 0
-  m_Name: TapPosition
+  m_Name: TapPosition4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2180,7 +2180,7 @@ GameObject:
   - component: {fileID: 2061579848}
   - component: {fileID: 2061579847}
   m_Layer: 0
-  m_Name: Lane (3)
+  m_Name: Lane4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

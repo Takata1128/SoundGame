@@ -18,7 +18,13 @@ public class BMSHeader : IComparable<BMSHeader>
 
     public float Total { get; set; } = 400f;
 
-    public float Bpm { get; set; } = 0f;
+    // Header情報ではないが持たせる
+    public int NoteCount { get; set; } = 0;
+
+    public float MaxBpm { get; set; } = 0f;
+
+    public float MinBpm { get; set; } = 0f;
+
 
     public Dictionary<int, string> SoundPathes { get; set; }
 

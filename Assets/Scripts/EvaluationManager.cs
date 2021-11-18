@@ -4,15 +4,12 @@ using UnityEngine;
 
 public class EvaluationManager : MonoBehaviour
 {
-    // ƒXƒRƒAAƒRƒ“ƒ{
     public static int score;
     public static int combo;
     public static int maxCombo;
 
-    // ”»’è‚ÌŒÂ”
     public static Dictionary<JudgementType, int> judgementCounts = new Dictionary<JudgementType, int>();
 
-    // ”»’è‚ÌƒXƒRƒA‘‰Á—Ê
     public static Dictionary<JudgementType, int> judgementScores = new Dictionary<JudgementType, int>() {
         {JudgementType.Perfect,2},
         {JudgementType.Great,1},
@@ -23,7 +20,8 @@ public class EvaluationManager : MonoBehaviour
 
 
     // Start is called before the first frame update
-    void Start() {
+    void Start()
+    {
         score = 0;
         combo = 0;
         maxCombo = 0;
@@ -36,26 +34,29 @@ public class EvaluationManager : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update() {
-        // maxComboXV
+    void Update()
+    {
+        // maxComboï¿½Xï¿½V
         maxCombo = Mathf.Max(combo, maxCombo);
     }
 
-    public static void OnHit(JudgementType judgementType) {
-        // ƒRƒ“ƒ{”‚ğƒCƒ“ƒNƒŠƒƒ“ƒg
+    public static void OnHit(JudgementType judgementType)
+    {
+        // ï¿½Rï¿½ï¿½ï¿½{ï¿½ï¿½ï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½Nï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½g
         combo++;
 
-        // ƒXƒRƒA‰ÁZ
+        // ï¿½Xï¿½Rï¿½Aï¿½ï¿½ï¿½Z
         score += judgementScores[judgementType];
 
-        // ƒJƒEƒ“ƒgƒCƒ“ƒNƒŠƒƒ“ƒg
+        // ï¿½Jï¿½Eï¿½ï¿½ï¿½gï¿½Cï¿½ï¿½ï¿½Nï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½g
         judgementCounts[judgementType]++;
     }
 
-    public static void OnMiss() {
-        // ƒRƒ“ƒ{ƒŠƒZƒbƒg
+    public static void OnMiss()
+    {
+        // ï¿½Rï¿½ï¿½ï¿½{ï¿½ï¿½ï¿½Zï¿½bï¿½g
         combo = 0;
-        // Œ©“¦‚µƒCƒ“ƒNƒŠƒƒ“ƒg
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½Nï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½g
         judgementCounts[JudgementType.Poor]++;
     }
 }

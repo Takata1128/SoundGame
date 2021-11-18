@@ -1,8 +1,5 @@
 using System.Collections;
-using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
-using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 public class PlayerController : MonoBehaviour
 {
@@ -19,9 +16,7 @@ public class PlayerController : MonoBehaviour
 
     public static MyList<BgmController> ExistingBGSoundControllers;
 
-    public static List<BmsLoader> BmsLoaders;
-    public static BMSHeader BmsHeader;
-    public static BMSScore BmsScore;
+    public static BmsData BmsData;
     [SerializeField] public SoundManager SoundManager;
 
     private float startOffset = 1.0f; // ���ʂ̃I�t�Z�b�g�i�b�j
@@ -30,7 +25,7 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator PreLoad()
     {
-        SoundManager.Pathes = BmsHeader.SoundPathes;
+        SoundManager.Pathes = BmsData.BmsHeader.SoundPathes;
         SoundManager.AddAudioClips();
         yield return new WaitUntil(() => SoundManager.IsPrepared);
         Debug.Log("Game starts!");
@@ -51,13 +46,13 @@ public class PlayerController : MonoBehaviour
             ExistingNoteControllers[i] = new MyList<NoteControllerBase>();
         }
 
-        foreach (var bpm in BmsScore.Bpms)
+        foreach (var bpm in BmsData.BmsScore.Bpms)
         {
             Debug.Log(bpm.BeatBegin + ": " + bpm.Bpm);
         }
 
         // Bgm�I�u�W�F�N�g�̐���
-        MakeObject(BmsScore);
+        MakeObject(BmsData.BmsScore);
         StartCoroutine(PreLoad());
     }
 
@@ -66,7 +61,7 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!isPlaying && Input.GetKeyDown(KeyCode.Space))
+        if (!isPlaying && Input.GetKeyDown(KeyCode.Return))
         {
             isPlaying = true;
         }
@@ -76,15 +71,22 @@ public class PlayerController : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            SelectorController.BmsLoaders = BmsLoaders;
-            SceneManager.LoadScene("SelectScene");
+            SceneManager.sceneLoaded += GameSceneLoaded;
+            SceneManager.LoadScene("ResultScene");
         }
 
         CurrentSec = Time.time - startOffset - startSec;
-        CurrentBeat = Util.ToBeat(CurrentSec, BmsScore.Bpms);
+        CurrentBeat = Util.ToBeat(CurrentSec, BmsData.BmsScore.Bpms);
     }
 
-    void MakeObject(BMSScore BmsScore)
+    private void GameSceneLoaded(Scene next, LoadSceneMode mode)
+    {
+        var resultController = GameObject.Find("ResultController").GetComponent<ResultController>();
+        resultController.JudgementCounts = EvaluationManager.judgementCounts;
+        SceneManager.sceneLoaded -= GameSceneLoaded;
+    }
+
+    private void MakeObject(BMSScore BmsScore)
     {
         for (int lane = 0; lane < BmsScore.Lanes.Length; lane++)
         {

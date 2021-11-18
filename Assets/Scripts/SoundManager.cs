@@ -37,7 +37,7 @@ public class SoundManager : MonoBehaviour
             {
                 filePath = filePath.Replace("#", "%23");
             }
-            string url = PlayerController.BmsHeader.ParentPath + System.IO.Path.DirectorySeparatorChar + filePath;
+            string url = PlayerController.BmsData.BmsHeader.ParentPath + System.IO.Path.DirectorySeparatorChar + filePath;
 
             // wav以外の拡張子の場合
             if (!File.Exists(url))
